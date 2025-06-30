@@ -11,7 +11,7 @@ contract Staking is Ownable, ReentrancyGuardTransient{
     IERC20 rewardToken;
 
     uint256 private basicAPR = 1000; // 10%
-    uint256 public totalStaked = 800000000000000000000;
+    uint256 public totalStaked;
     uint256 private SCALING_FACTOR = 10000; // 100%
     uint256 private totalRewardsPaid;
     uint256 private penaltyPercentage = 500;  // 5%
