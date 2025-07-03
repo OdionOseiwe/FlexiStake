@@ -6,11 +6,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
 
-contract Staking is Ownable, ReentrancyGuardTransient{
+contract Stake is Ownable, ReentrancyGuardTransient{
     using SafeERC20 for IERC20;
     IERC20 rewardToken;
 
-    uint256 private basicAPR = 1000; // 10%
+    uint256 private basicAPR = 10e18; // 10%
     uint256 public totalStaked;
     uint256 private SCALING_FACTOR = 10000; // 100%
     uint256 private totalRewardsPaid;
@@ -142,7 +142,7 @@ contract Staking is Ownable, ReentrancyGuardTransient{
 
     function currentAPR(uint256 _totalStaked) public view returns (uint256) {
         uint256 numerator = basicAPR * SCALING_FACTOR * 1e18; // Scale up numerator first
-        uint256 denominator = SCALING_FACTOR + (_totalStaked / 1e14);
+        uint256 denominator = SCALING_FACTOR + (_totalStaked / 1e18);
         require(denominator != 0, "Math error");
         return numerator / denominator;
     }
