@@ -40,8 +40,9 @@ export default function Stake() {
               <p>options</p>
             </div>
           <div>
-            <p className='text-gray-500 md:text-xl'>My Stake: <span>0.0</span></p>
-            <p className='text-gray-500 md:text-xl'>Pending rewards: <span>0.0</span></p>
+            <div className= 'bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl' >My Stake: <span className='text-black font-bold'>0.0</span></div>
+            <p className= 'bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl' >Pending rewards: <span className='text-black font-bold'>0.0</span></p>
+            <p className= 'bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl' > <span className='text-black font-bold'>7</span> days left</p>
             <div className='mt-6'>
               <Button label="Withdraw"/>
               <Button label="Emergency withdraw"/>
