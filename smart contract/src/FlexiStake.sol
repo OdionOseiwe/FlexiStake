@@ -112,7 +112,7 @@ contract Stake is Ownable, ReentrancyGuardTransient{
         basicAPR = _apr * 100; // basic points
     }
 
-    function _getLockupDuration(LockupTier _tier) private pure returns (uint256) {
+    function _getLockupDuration(LockupTier _tier) internal pure returns (uint256) {
         if (_tier == LockupTier.TIER_30_DAYS) return 30 days;
         if (_tier == LockupTier.TIER_90_DAYS) return 90 days;
         return 365 days;
@@ -123,7 +123,7 @@ contract Stake is Ownable, ReentrancyGuardTransient{
         Rewards[_owner][_lockupTier]+= pending;  
     }
 
-    function calculateRewards(address _owner, LockupTier _lockupTier) public view  returns(uint256) {
+    function calculateRewards(address _owner, LockupTier _lockupTier) internal view  returns(uint256) {
         uint256 stakingDuration = block.timestamp - stakes[_owner][_lockupTier].lastUpdateTime;
         uint256 stakedAmount = stakes[_owner][_lockupTier].stakeAmount;
         if (stakedAmount == 0) return 0;

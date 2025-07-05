@@ -1,7 +1,9 @@
-import React from 'react'
 import { ArrowDown } from 'lucide-react';
 import Button from '../Components/Button';
 import Ethereum from '../images/ethereum.png'
+import Dropdown from '../Components/Dropdown';
+import PopUpModal from '../Components/PopUpModal';
+
 
 export default function Stake() {
   return (
@@ -12,7 +14,9 @@ export default function Stake() {
       transition-all duration-500'>
         <div>
           <h1 className='md:text-2xl text-xl'> Stake Tokens</h1>
-          <p className='mt-4 text-gray-500 font-extralight'>APY total value <span className='ml-2'>3%</span></p>
+          <p className='mt-4 text-fuchsia-950 font-extralight'>APY total value <span className='ml-2'>3%</span></p>
+          <p className='mt-4 text-gray-500 text-l font-bold'>Stake your tokens in Tier 1, 2, or 3. Earn interest as you stake, <br/>
+          plus bonus rewards for completing the full tier — 1.5× in Tier 2, 3× in Tier 3</p>
           <div className='flex justify-between items-center bg-fuchsia-950 p-6 h-16 brightness-125 
               rounded-xl shadow-2xl shadow-blue-700 mt-5 text-gray-500'>
             <div className='flex items-center'>
@@ -20,11 +24,11 @@ export default function Stake() {
               <p>mETH</p>
             </div>
             <div>
-              options
+              <Dropdown/>
             </div>
           </div>
           <div className='flex justify-center mt-4 mb-2'><ArrowDown/></div>
-          <form >
+          <form className='' >
             <label className=''>Enter amount</label>
             <input className='flex justify-between items-center bg-fuchsia-950 p-4 w-full h-16 brightness-125 mb-6 
             rounded-xl shadow-2xl shadow-blue-700 mt-1 text-gray-500 focus:border-none focus:outline-0 text-2xl' 
@@ -36,14 +40,14 @@ export default function Stake() {
         </div>
 
         <div className='bg-fuchsia-950 md:p-6 p-3 rounded-2xl mt-8 md:border-t-1'>
-            <div className='flex justify-end'>
-              <p>options</p>
-            </div>
+              <p className='flex justify-end'> 
+                <Dropdown/>
+              </p>
           <div>
-            <div className= 'bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl' >My Stake: <span className='text-black font-bold'>0.0</span></div>
+            <div className= 'mt-4 bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl' >My Stake: <span className='text-black font-bold'>0.0</span></div>
             <p className= 'bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl' >Pending rewards: <span className='text-black font-bold'>0.0</span></p>
             <p className= 'bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl' > <span className='text-black font-bold'>7</span> days left</p>
-            <div className='mt-6'>
+            <div className='mt-6 '>
               <Button label="Withdraw"/>
               <Button label="Emergency withdraw"/>
               <Button label="Claim rewards"/>
