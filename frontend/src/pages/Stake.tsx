@@ -3,9 +3,14 @@ import Button from '../Components/Button';
 import Ethereum from '../images/ethereum.png'
 import Dropdown from '../Components/Dropdown';
 import PopUpModal from '../Components/PopUpModal';
+import { useState } from 'react';
 
 
 export default function Stake() {
+  const [showModalWithdraw, setshowModalWithdrawdal] = useState<boolean>(false)
+  const [showModalEmergencyWithdraw, setshowModalEmergencyWithdraw] = useState<boolean>(false)
+  const [showModalClaimRewards, setshowModalClaimRewards] = useState<boolean>(false)
+
   return (
     <div className='md:px-12  md:py-6 bg-linear-to-br from-fuchsia-950 to-blue-950 brighteness-50'>
       <div className='flex justify-end mb-8'><p className='text-xl text-gray-500 bg-amber-300 p-4 rounded-2xl'>connect wallet</p></div>
@@ -48,11 +53,24 @@ export default function Stake() {
             <p className= 'bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl' >Pending rewards: <span className='text-black font-bold'>0.0</span></p>
             <p className= 'bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl' > <span className='text-black font-bold'>7</span> days left</p>
             <div className='mt-6 '>
-              <Button label="Withdraw"/>
-              <Button label="Emergency withdraw"/>
-              <Button label="Claim rewards"/>
+              <Button label="Withdraw" onClick= {()=>setshowModalWithdrawdal(!showModalWithdraw)}/>
+              <Button label="Emergency withdraw" onClick= {()=>setshowModalEmergencyWithdraw(!showModalEmergencyWithdraw)}/>
+              <Button label="Claim rewards" onClick= {()=>setshowModalClaimRewards(!showModalClaimRewards)}/>
             </div>
-          </div>
+                {showModalWithdraw && <PopUpModal PopUplabel='withdraw'message='' onClick={()=> setshowModalWithdrawdal(false)} />}
+
+                {showModalEmergencyWithdraw && <PopUpModal PopUplabel='Emergency withdraw' 
+                message='⚠️ Withdrawing your stake before the tier period ends will incur a 5% penalty fee on the amount withdrawn.
+                          Additionally, no rewards will be earned or distributed for early withdrawals.
+                          Please ensure you are aware of the lock-in period before initiating a withdrawal.'
+                          onClick={()=> setshowModalEmergencyWithdraw(false)}/>}
+
+                {showModalClaimRewards && <PopUpModal PopUplabel='Claim rewards' 
+                message='Congratulations! 🎉 You’ve successfully completed the tier period.
+                You can now withdraw your full stake without any penalty, along with your earned rewards.
+                Thank you for staking with us!'
+                onClick={()=> setshowModalClaimRewards(false)}/>}
+           </div>
           
         </div>
       </div>
