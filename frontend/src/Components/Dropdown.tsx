@@ -1,8 +1,11 @@
 import { useState } from "react"
 import { ChevronDown, ChevronUp } from 'lucide-react';
-
-const Dropdown = () => {
-    const [tier, setTier] = useState<string>("Tier1");
+type DropDownProps
+={
+  tier: string,
+  setTier: (tier:string)=> void
+}
+const Dropdown = ({tier, setTier}: DropDownProps) => {
     const [active, setActive] = useState<boolean>(false);
   return (
     <div>
@@ -10,8 +13,7 @@ const Dropdown = () => {
       md:text-l p-2 mb-2  rounded-xl cursor-pointer">
         <p className="mr-3"> {tier}</p>
         <p>
-            {active && <ChevronUp/>}
-            {!active && <ChevronDown/>}
+            {active ?<ChevronUp/>: <ChevronDown/>}
         </p>
       </button>
       {active && <div className="text-gray-500 bg-fuchsia-950 

@@ -10,7 +10,7 @@ contract Stake is Ownable, ReentrancyGuardTransient{
     using SafeERC20 for IERC20;
     IERC20 rewardToken;
 
-    uint256 private basicAPR = 10e18; // 10%
+    uint256 public basicAPR = 10e18; // 10%
     uint256 public totalStaked;
     uint256 private SCALING_FACTOR = 10000; // 100%
     uint256 private totalRewardsPaid;
