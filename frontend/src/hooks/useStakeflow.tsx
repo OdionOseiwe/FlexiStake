@@ -1,24 +1,23 @@
 import { useState } from "react";
-import {ethers } from "ethers";
+import { ethers } from "ethers";
 import TokenAbi from "../ABI/TokenAbi.json";
 import StakeAbi from "../ABI/StakeAbi.json";
-import { TokenAddress, StakeAddress } from "../ABI/utils/address";
-import {useWalletClient } from "wagmi";
+import { TokenAddress, StakeAddress } from "../utils/address";
+import { useWalletClient } from "wagmi";
 
-  export const useStakeFlow = () => {
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [approve, isApproving] = useState(false);
-    const [stake, isStaking] = useState(false);
-    const { data: walletClient } = useWalletClient();
+export const useStakeFlow = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [approve, isApproving] = useState(false);
+  const [stake, isStaking] = useState(false);
+  const { data: walletClient } = useWalletClient();
 
-  const  getSigner= async() => {
+  const getSigner = async () => {
     const provider = new ethers.BrowserProvider(walletClient.transport);
-    return await provider.getSigner();  
-    
-  }
+    return await provider.getSigner();
+  };
 
-  async function approveTokens(amount:bigint) {
+  async function approveTokens(amount: bigint) {
     try {
       isApproving(true);
       setLoading(true);
@@ -41,13 +40,17 @@ import {useWalletClient } from "wagmi";
     }
   }
 
-  const stakeTokens = async(amount:bigint, tier:number)=> {
+  const stakeTokens = async (amount: bigint, tier: number) => {
     try {
       setError(null);
 
       const signer = await getSigner();
       const tokenContract = new ethers.Contract(TokenAddress, TokenAbi, signer);
-      const stakingContract = new ethers.Contract(StakeAddress, StakeAbi, signer);
+      const stakingContract = new ethers.Contract(
+        StakeAddress,
+        StakeAbi,
+        signer
+      );
 
       const owner = await signer.getAddress();
       const allowance = await tokenContract.allowance(owner, StakeAddress);
@@ -60,8 +63,8 @@ import {useWalletClient } from "wagmi";
       setLoading(true);
       const tx = await stakingContract.stakeToken(amount, tier);
       await tx.wait();
-        setLoading(false);
-        isStaking(false);
+      setLoading(false);
+      isStaking(false);
       return true;
     } catch (err) {
       setError(err.message);
@@ -69,7 +72,7 @@ import {useWalletClient } from "wagmi";
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return {
     approveTokens,
@@ -77,6 +80,7 @@ import {useWalletClient } from "wagmi";
     loading,
     error,
     approve,
-    stake
+    stake,
+    getSigner,
   };
-}
+};

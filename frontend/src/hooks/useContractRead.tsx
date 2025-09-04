@@ -6,12 +6,17 @@ type ReadType = {
   abi:any
 }
 
-export function useContractRead({ address, functionName, args, abi }: ReadType) {
+export function useContractRead({
+  address,
+  functionName,
+  args,
+  abi,
+}: ReadType) {
   return useReadContract({
     abi,
     address,
     functionName,
     args,
-  })
+  }) as { data: undefined; isLoading: boolean; error: Error | null };
 }
 
