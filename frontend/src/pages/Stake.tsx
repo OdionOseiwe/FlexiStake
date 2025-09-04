@@ -14,11 +14,11 @@ import { GetTierNumber } from '../utils/tier';
 import {formatEther } from "ethers";
 import {StakeAddress} from '../utils/address'
 import { useAccount } from 'wagmi'
+import {convertEpochToDays} from '../utils/epochConverter'
+type ModalType = 'withdraw' | 'emergency' | 'claim' | null;
 
 export default function Stake() {
   const { address, isConnected } = useAccount();
-
-  type ModalType = 'withdraw' | 'emergency' | 'claim' | null;
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [formData, setFormData] = useState({
     stakeAmount: '',
@@ -26,9 +26,11 @@ export default function Stake() {
     emergencyAmount: '',
     claimAmount: '',
   });  
-
   const [rewardsTier, setRewardsTier] = useState("Tier1");
   const { writeToContractState } = useContractWrite();
+
+  console.log(convertEpochToDays(1756765320, GetTierNumber(rewardsTier)));
+  
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,7 @@ export default function Stake() {
     alert("withdrawal successful 🎉")
   };
 
-   const handleEmergencyWithdraw = async (e: React.FormEvent) => {
+  const handleEmergencyWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
     await writeToContractState({
       abi: StakeAbi,
@@ -60,6 +62,8 @@ export default function Stake() {
     functionName: "getUserStake",
     args: [address, GetTierNumber(rewardsTier)],
   });
+
+  
 
   const { data: rewardData, isLoading:isRewardLoading } = useContractRead({
     abi: StakeAbi,
@@ -96,7 +100,7 @@ export default function Stake() {
               </p>
               <p className="bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl">
                 {" "}
-                <span className="text-black font-bold">7</span> days left
+                <span className="text-black font-bold">{convertEpochToDays(1756765320, GetTierNumber(rewardsTier))}</span> days left
               </p>
               <div className="mt-6 ">
                 <Button label="Withdraw" onClick={() => setActiveModal('withdraw')} />
