@@ -39,16 +39,6 @@ export default function Stake() {
     alert("withdrawal successful 🎉")
   };
 
-  const handleEmergencyWithdraw = async () => {
-    await writeToContractState({
-      abi: StakeAbi,
-      address: StakeAddress,
-      functionName: "emergencyWithdraw",
-      args: [parseUnits(formData.emergencyAmount, 18), GetTierNumber(rewardsTier)],
-    });
-    alert("withdrawal successful 🎉")
-  };
-
   const handleClaimRewards = async () => {
     await writeToContractState({
       abi: StakeAbi,
@@ -109,32 +99,17 @@ export default function Stake() {
               </p>
               <div className="mt-6 ">
                 <Button label="Withdraw" onClick={() => setActiveModal('withdraw')} />
-                <Button label="Emergency withdraw" onClick={() => setActiveModal('emergency')} />
                 <Button label="Claim rewards" onClick={() => setActiveModal('claim')} />
               </div>
               {activeModal === 'withdraw' && (
                 <PopUpModal
                   PopUplabel="withdraw"
-                  message=""
+                  message="If you withdraw before the tier period ends, a 5% penalty will be deducted from your withdrawal amount"
                   onClose={() => setActiveModal(null)}
                   onConfirm ={()=> {
                     handleWithdraw(); setActiveModal(null);
                   }}
-                   setAmount={(p)=>setFormData({...formData, withdrawAmount: p})}
-                />
-              )}
-
-              {activeModal === 'emergency' && (
-                <PopUpModal
-                  PopUplabel="Emergency withdraw"
-                  message="⚠️ Withdrawing your stake before the tier period ends will incur a 5% penalty fee on the amount withdrawn.
-                          Additionally, no rewards will be earned or distributed for early withdrawals.
-                          Please ensure you are aware of the lock-in period before initiating a withdrawal."
-                          onClose={() => setActiveModal(null)}
-                  onConfirm ={(e)=> {
-                    handleEmergencyWithdraw(); setActiveModal(null); e.preventDefault();
-                  }}
-                  setAmount={(p)=>setFormData({...formData, emergencyAmount:p})}
+                  setAmount={(p)=>setFormData({...formData, withdrawAmount: p})}
                 />
               )}
 
@@ -142,9 +117,8 @@ export default function Stake() {
                 <PopUpModal
                   PopUplabel="Claim rewards"
                   message="Congratulations! 🎉 You’ve successfully completed the tier period.
-                You can now withdraw your full stake without any penalty, along with your earned rewards.
-                Thank you for staking with us!"
-                onClose={() => setActiveModal(null)}
+                  Thank you for staking with us!"
+                  onClose={() => setActiveModal(null)}
                   onConfirm ={()=> {
                     handleClaimRewards(); setActiveModal(null);
                   }}

@@ -57,41 +57,32 @@ contract Stake is Ownable, ReentrancyGuardTransient{
         emit Staked(msg.sender, _amount);
     }
 
-    function withdraw(uint256 _amount, LockupTier _lockupTier) public nonReentrant{
+    function withdraw(uint256 _amount, LockupTier _lockupTier) public nonReentrant {
         Stake storage userStake = stakes[msg.sender][_lockupTier];
-        require(userStake.stakeAmount >= _amount, "cant withdraw");
+        require(userStake.stakeAmount >= _amount, "Insufficient staked amount");
 
-        uint256 _lastUpdateTime = userStake.lastUpdateTime;
-        updateRewards(msg.sender,_lockupTier);
+        updateRewards(msg.sender, _lockupTier);
 
         uint256 lockUp = _getLockupDuration(_lockupTier);
-        require(block.timestamp - _lastUpdateTime >= lockUp, "early Withdrawal");
+        uint256 stakingDuration = block.timestamp - userStake.lastUpdateTime;
 
-        totalStaked-= _amount;
-        userStake.lastUpdateTime = block.timestamp;
+        uint256 amountToTransfer = _amount;
+
+        // Apply 5% penalty if withdrawing before the tier ends
+        if (stakingDuration < lockUp) {
+            uint256 penalty = (_amount * 500) / 10000; // 5% penalty
+            amountToTransfer = _amount - penalty;
+        }
+
+        totalStaked -= _amount;
         userStake.stakeAmount -= _amount;
+        userStake.lastUpdateTime = block.timestamp;
 
-        rewardToken.safeTransfer(msg.sender, _amount);
+        rewardToken.safeTransfer(msg.sender, amountToTransfer);
 
-        emit Withdraw(msg.sender, _amount);
+        emit Withdraw(msg.sender, amountToTransfer);
     }
 
-    function emergencyWithdraw(uint256 _amount, LockupTier _lockupTier) public nonReentrant {
-        Stake storage userStake = stakes[msg.sender][_lockupTier];
-        require(userStake.stakeAmount >= _amount, "cant withdraw");
-
-        uint256 lockUp = _getLockupDuration(_lockupTier);
-        require(block.timestamp - userStake.lastUpdateTime < lockUp, "This is not an early withdrawal");
-
-        uint256 penaltyAmount = (_amount * penaltyPercentage) / 10000;
-        totalStaked-= _amount;
-        userStake.lastUpdateTime = block.timestamp;
-        userStake.stakeAmount -= _amount;
-
-        rewardToken.safeTransfer(msg.sender, (_amount - penaltyAmount));
-
-        emit EmergencyWithdraw(msg.sender, _amount);
-    }
 
     // automatically stake rewards again
     function claimRewards(LockupTier _lockupTier) public nonReentrant{
@@ -123,10 +114,17 @@ contract Stake is Ownable, ReentrancyGuardTransient{
         Rewards[_owner][_lockupTier]+= pending;  
     }
 
-    function calculateRewards(address _owner, LockupTier _lockupTier) internal view  returns(uint256) {
-        uint256 stakingDuration = block.timestamp - stakes[_owner][_lockupTier].lastUpdateTime;
-        uint256 stakedAmount = stakes[_owner][_lockupTier].stakeAmount;
+    function calculateRewards(address _owner, LockupTier _lockupTier) internal view returns (uint256) {
+        Stake storage userStake = stakes[_owner][_lockupTier];
+        uint256 stakedAmount = userStake.stakeAmount;
         if (stakedAmount == 0) return 0;
+
+        uint256 stakingDuration = block.timestamp - userStake.lastUpdateTime;
+        uint256 lockUp = _getLockupDuration(_lockupTier);
+
+        if (stakingDuration > lockUp) {
+            stakingDuration = lockUp;
+        }
 
         uint256 tierMultiplier;
         if (_lockupTier == LockupTier.TIER_30_DAYS) tierMultiplier = 1000;      // 1x
@@ -136,9 +134,10 @@ contract Stake is Ownable, ReentrancyGuardTransient{
         uint256 apr = currentAPR(totalStaked);
         uint256 rewardPerYear = (stakedAmount * apr) / 1e18;
         uint256 rewardForDuration = (rewardPerYear * stakingDuration) / 365 days;
-    
+
         return (rewardForDuration * tierMultiplier) / 100000;
     }
+
 
     function currentAPR(uint256 _totalStaked) public view returns (uint256) {
         uint256 numerator = basicAPR * SCALING_FACTOR * 1e18; // Scale up numerator first
