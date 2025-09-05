@@ -1,6 +1,6 @@
 import { ArrowDown } from 'lucide-react';
 import Button from '../Components/Button';
-import Ethereum from '../images/ethereum.png'
+import Tether from '../images/tether.svg'
 import Dropdown from '../Components/Dropdown';
 import { useState } from 'react';
 import { useStakeFlow } from '../hooks/useStakeflow';
@@ -47,9 +47,9 @@ function StakeForm({ stakeAmount, setStakeAmount }: StakeFormProps) {
         >
           <div className="flex items-center">
             <div className="mr-2">
-              <img src={Ethereum} alt="logo " className="size-8 rounded-full" />
+              <img src={Tether} alt="logo " className="size-8 rounded-full" />
             </div>
-            <p>mETH</p>
+            <p>mUSDT</p>
           </div>
           <div>
             <Dropdown tier={stakeTier} setTier={setStakeTier} />

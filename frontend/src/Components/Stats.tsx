@@ -1,5 +1,5 @@
 import React from 'react'
-import Ethereum from '../images/ethereum.png'
+import Tether from '../images/tether.svg'
 
 export default function Stats() {
   return (
@@ -14,7 +14,7 @@ export default function Stats() {
               <div className="flex items-center">
                 <div className="mr-4">
                   <img
-                    src={Ethereum}
+                    src={Tether}
                     alt="logo "
                     className="size-8 rounded-full"
                   />
@@ -39,7 +39,7 @@ export default function Stats() {
               <div className="flex items-center">
                 <div className="mr-4">
                   <img
-                    src={Ethereum}
+                    src={Tether}
                     alt="logo "
                     className="size-8 rounded-full"
                   />
@@ -56,3 +56,4 @@ export default function Stats() {
     </div>
   )
 }
+
