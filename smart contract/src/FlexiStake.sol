@@ -52,7 +52,7 @@ contract Stake is Ownable, ReentrancyGuardTransient{
         totalStaked += _amount;
         userStake.stakeAmount += _amount;
         userStake.lastUpdateTime = block.timestamp;
-
+        basicAPR = currentAPR(totalStaked);
         rewardToken.safeTransferFrom(msg.sender, address(this), _amount);
         emit Staked(msg.sender, _amount);
     }

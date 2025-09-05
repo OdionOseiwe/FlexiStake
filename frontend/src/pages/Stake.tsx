@@ -11,7 +11,7 @@ import {useContractRead} from '../hooks/useContractRead';
 import { useContractWrite } from '../hooks/useContractWrite';
 import StakeAbi from '../ABI/StakeAbi.json'
 import { GetTierNumber } from '../utils/tier';
-import {formatEther } from "ethers";
+import {formatEther, parseUnits } from "ethers";
 import {StakeAddress} from '../utils/address'
 import { useAccount } from 'wagmi'
 import {convertEpochToDays} from '../utils/epochConverter'
@@ -29,31 +29,35 @@ export default function Stake() {
   const [rewardsTier, setRewardsTier] = useState("Tier1");
   const { writeToContractState } = useContractWrite();
 
-  console.log(convertEpochToDays(1756765320, GetTierNumber(rewardsTier)));
-  
-
-  const handleWithdraw = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleWithdraw = async () => {
     await writeToContractState({
       abi: StakeAbi,
       address: StakeAddress,
       functionName: "withdraw",
-      args: [formData.withdrawAmount, GetTierNumber(rewardsTier)],
+      args: [parseUnits(formData.withdrawAmount,18), GetTierNumber(rewardsTier)],
     });
     alert("withdrawal successful 🎉")
   };
 
-  const handleEmergencyWithdraw = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmergencyWithdraw = async () => {
     await writeToContractState({
       abi: StakeAbi,
       address: StakeAddress,
       functionName: "emergencyWithdraw",
-      args: [formData.emergencyAmount, GetTierNumber(rewardsTier)],
+      args: [parseUnits(formData.emergencyAmount, 18), GetTierNumber(rewardsTier)],
     });
     alert("withdrawal successful 🎉")
   };
 
+  const handleClaimRewards = async () => {
+    await writeToContractState({
+      abi: StakeAbi,
+      address: StakeAddress,
+      functionName: "claimRewards",
+      args: [GetTierNumber(rewardsTier)],
+    });
+    alert("withdrawal successful 🎉")
+  };
 
   /////////////Read functions //////////////////////
   const { data: stakeData, isLoading:isStakeLoading } = useContractRead({
@@ -63,8 +67,6 @@ export default function Stake() {
     args: [address, GetTierNumber(rewardsTier)],
   });
 
-  
-
   const { data: rewardData, isLoading:isRewardLoading } = useContractRead({
     abi: StakeAbi,
     address: StakeAddress,
@@ -72,12 +74,15 @@ export default function Stake() {
     args: [address, GetTierNumber(rewardsTier)],
   });
 
+  console.log(rewardData);
+  
+
   if (isStakeLoading || isRewardLoading) {
     return <div className='grid justify-center'><Loader color="#3e9392" size={50}/></div>;
   } 
 
   return (
-    <div className="md:px-12  md:py-6 bg-linear-to-br from-fuchsia-950 to-blue-950 brighteness-50">
+    <div className="md:px-12  md:py-6 bg-linear-to-br from-fuchsia-950 to-blue-950 brighteness-50 h-full min-h-screen">
       <ConnectButton client={client} />
       <div className="flex flex-wrap justify-around mt-10">
         <div
@@ -100,7 +105,7 @@ export default function Stake() {
               </p>
               <p className="bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl">
                 {" "}
-                <span className="text-black font-bold">{convertEpochToDays(1756765320, GetTierNumber(rewardsTier))}</span> days left
+                <span className="text-black font-bold">{convertEpochToDays(Number(stakeData[1]), GetTierNumber(rewardsTier),rewardData)}</span> days left
               </p>
               <div className="mt-6 ">
                 <Button label="Withdraw" onClick={() => setActiveModal('withdraw')} />
@@ -113,7 +118,7 @@ export default function Stake() {
                   message=""
                   onClose={() => setActiveModal(null)}
                   onConfirm ={()=> {
-                    handleWithdraw; setActiveModal(null);
+                    handleWithdraw(); setActiveModal(null);
                   }}
                    setAmount={(p)=>setFormData({...formData, withdrawAmount: p})}
                 />
@@ -126,8 +131,8 @@ export default function Stake() {
                           Additionally, no rewards will be earned or distributed for early withdrawals.
                           Please ensure you are aware of the lock-in period before initiating a withdrawal."
                           onClose={() => setActiveModal(null)}
-                  onConfirm ={()=> {
-                    handleEmergencyWithdraw; setActiveModal(null);
+                  onConfirm ={(e)=> {
+                    handleEmergencyWithdraw(); setActiveModal(null); e.preventDefault();
                   }}
                   setAmount={(p)=>setFormData({...formData, emergencyAmount:p})}
                 />
@@ -141,7 +146,7 @@ export default function Stake() {
                 Thank you for staking with us!"
                 onClose={() => setActiveModal(null)}
                   onConfirm ={()=> {
-                    handleWithdraw; setActiveModal(null);
+                    handleClaimRewards(); setActiveModal(null);
                   }}
                   setAmount={(p)=> setFormData({...formData, claimAmount:p})}
                 />
