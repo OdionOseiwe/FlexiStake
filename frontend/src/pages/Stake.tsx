@@ -27,26 +27,33 @@ export default function Stake() {
     claimAmount: '',
   });  
   const [rewardsTier, setRewardsTier] = useState("Tier1");
-  const { writeToContractState, isError} = useContractWrite();
+  const { writeToContractState:withdraw, isError:WithdrawError, isPending:withdrawPending, isSuccess:withdrawSuccess} = useContractWrite();
+  const {
+    writeToContractState: claim,
+    isError: claimError,
+    isPending: claimPending,
+    isSuccess: claimSuccess,
+  } = useContractWrite();
+
 
   const handleWithdraw = async () => {
-    await writeToContractState({
+    await withdraw({
       abi: StakeAbi,
       address: StakeAddress,
       functionName: "withdraw",
       args: [parseUnits(formData.withdrawAmount,18), GetTierNumber(rewardsTier)],
     });
-    alert("withdrawal successful 🎉")
   };
+  
 
   const handleClaimRewards = async () => {
-    await writeToContractState({
+      await claim({
       abi: StakeAbi,
       address: StakeAddress,
       functionName: "claimRewards",
       args: [GetTierNumber(rewardsTier)],
     });
-    alert("withdrawal successful 🎉")
+ 
   };
 
   /////////////Read functions //////////////////////
@@ -64,10 +71,9 @@ export default function Stake() {
     args: [address, GetTierNumber(rewardsTier)],
   });
 
-  console.log(rewardData);
-  
 
-  if (isStakeLoading || isRewardLoading) {
+  
+  if (isStakeLoading && isRewardLoading ) {
     return <div className='grid justify-center'><Loader color="#3e9392" size={50}/></div>;
   } 
 
@@ -97,13 +103,17 @@ export default function Stake() {
                 {" "}
                 <span className="text-black font-bold">{convertEpochToDays(Number(stakeData[1]), GetTierNumber(rewardsTier),rewardData)}</span> days left
               </p>
+              {withdrawSuccess && <div className='text-green-700'> withdrawal successful </div>}
+              {claimSuccess && <div className='text-green-700'> rewards claimed </div>}
+              {WithdrawError && <div className="text-red-500">Error while withdawing"</div>}
+              {claimError && <div className="text-red-500">Error while claiming rewards"</div>}
               <div className="mt-6 ">
-                <Button label="Withdraw" onClick={() => setActiveModal('withdraw')} />
-                <Button label="Claim rewards" onClick={() => setActiveModal('claim')} />
+                <Button label= {withdrawPending ? "withdrawing" : "withdraw"} onClick={() => setActiveModal('withdraw')} />
+                <Button label={claimPending ? "claiming rewards" : "claim rewards"} onClick={() => setActiveModal('claim')} />
               </div>
               {activeModal === 'withdraw' && (
                 <PopUpModal
-                  PopUplabel="withdraw"
+                  PopUplabel= 'withdraw'
                   message="If you withdraw before the tier period ends, a 5% penalty will be deducted from your withdrawal amount"
                   onClose={() => setActiveModal(null)}
                   onConfirm ={()=> {
@@ -115,7 +125,7 @@ export default function Stake() {
 
               {activeModal === 'claim' && (
                 <PopUpModal
-                  PopUplabel="Claim rewards"
+                  PopUplabel= 'claim rewards'
                   message="Congratulations! 🎉 You’ve successfully completed the tier period.
                   Thank you for staking with us!"
                   onClose={() => setActiveModal(null)}
@@ -126,7 +136,7 @@ export default function Stake() {
                 />
               )}
             </div>
-             {isError && <div className="text-red-500">Error while withdawing"</div>}
+             
           </div> : <div> Connect wallet</div>
         }
         </div>
