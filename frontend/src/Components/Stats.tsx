@@ -45,7 +45,7 @@ export default function Stats() {
                   />
                 </div>
                 <div>
-                  <p className="text-xs">mETH</p>
+                  <p className="text-xs">mUSDT</p>
                   <p className="text-l">
                     $ <span>1.8</span> B
                   </p>

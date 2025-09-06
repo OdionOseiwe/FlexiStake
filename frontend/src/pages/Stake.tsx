@@ -27,7 +27,7 @@ export default function Stake() {
     claimAmount: '',
   });  
   const [rewardsTier, setRewardsTier] = useState("Tier1");
-  const { writeToContractState } = useContractWrite();
+  const { writeToContractState, isError} = useContractWrite();
 
   const handleWithdraw = async () => {
     await writeToContractState({
@@ -126,6 +126,7 @@ export default function Stake() {
                 />
               )}
             </div>
+             {isError && <div className="text-red-500">Error while withdawing"</div>}
           </div> : <div> Connect wallet</div>
         }
         </div>

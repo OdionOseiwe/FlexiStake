@@ -24,10 +24,13 @@ function StakeForm({ stakeAmount, setStakeAmount }: StakeFormProps) {
       GetTierNumber(stakeTier)
     );
     if (success) {
+      alert("Stake successful!");
       setStakeAmount("");
     }
-    alert("Stake successful 🎉");
   };
+
+  console.log(error);
+  
   return (
     <>
       <div>
@@ -61,9 +64,7 @@ function StakeForm({ stakeAmount, setStakeAmount }: StakeFormProps) {
         <form className="">
           <label className="">Enter amount</label>
           <input
-            onChange={(e) =>
-              setStakeAmount(e.target.value)
-            }
+            onChange={(e) => setStakeAmount(e.target.value)}
             value={stakeAmount}
             className="flex justify-between items-center bg-fuchsia-950 p-4 w-full h-16 brightness-125 mb-6 
                     rounded-xl shadow-2xl shadow-blue-700 mt-1 text-gray-500 focus:border-none focus:outline-0 text-2xl"
@@ -85,8 +86,8 @@ function StakeForm({ stakeAmount, setStakeAmount }: StakeFormProps) {
             />
           </div>
           {approve && <p className="text-green-500 mt-2">Approving...</p>}
-          {stake && <p className="text-green-500 mt-2">Staking...</p>}
-          {error && <p className="text-red-500 mt-2">{error}</p>}
+          {stake && !error && <p className="text-green-500 mt-2">Staking...</p>}
+          {error && <p className="text-red-500 mt-2">error occured while staking</p>}
         </form>
       </div>
     </>

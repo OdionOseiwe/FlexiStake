@@ -127,20 +127,25 @@ contract Staking is Ownable, ReentrancyGuardTransient{
         }
 
         uint256 tierMultiplier;
-        if (_lockupTier == LockupTier.TIER_30_DAYS) tierMultiplier = 1000;      // 1x
-        else if (_lockupTier == LockupTier.TIER_90_DAYS) tierMultiplier = 1500; // 1.5x
-        else tierMultiplier = 3000; // 3x
+        if (_lockupTier == LockupTier.TIER_30_DAYS) tierMultiplier = 1e18;      // 1.0
+        else if (_lockupTier == LockupTier.TIER_90_DAYS) tierMultiplier = 15e17; // 1.5
+        else tierMultiplier = 3e18; // 3.0
 
-        uint256 apr = currentAPR(totalStaked);
-        uint256 rewardPerYear = (stakedAmount * apr) / 1e18;
-        uint256 rewardForDuration = (rewardPerYear * stakingDuration) / 365 days;
+        uint256 apr = currentAPR(totalStaked); // apr = 5e16 
+        uint256 rewardPerYear = (stakedAmount * apr) / 1e18;//(100e18 * 5e16) / 1e18
+        uint256 rewardForDuration = (rewardPerYear * stakingDuration) / 365 days;//(5e18 * 30) /365
 
-        return (rewardForDuration * tierMultiplier) / 100000;
+        return (rewardForDuration * tierMultiplier) / 1e18; //(4.1e17 * 1e18)/ 1e18 = 4.1e17
     }
 
-
+    // this is where the dynamic apr is calculated base on the totalStaked
     function currentAPR(uint256 _totalStaked) public view returns (uint256) {
-        uint256 numerator = basicAPR * SCALING_FACTOR * 1e18; // Scale up numerator first
+        // if basicAPR = 10e18 => 10%
+        // totalStaked = 10e18
+        // then numerator = 10e18 * 10000 = 1e21.
+        // then denominator = 10010
+        // 1e21 / 10010 = 9.999e16
+        uint256 numerator = basicAPR * SCALING_FACTOR; 
         uint256 denominator = SCALING_FACTOR + (_totalStaked / 1e18);
         require(denominator != 0, "Math error");
         return numerator / denominator;
