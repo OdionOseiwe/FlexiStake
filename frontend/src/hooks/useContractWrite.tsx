@@ -6,7 +6,7 @@ export function useContractWrite() {
     abi: any,
     address: `0x${string}`,
     functionName: string,
-    args?: readonly unknown[]
+    args: readonly any[] | [];
   }
 
   const writeToContractState = async ({abi, address, functionName, args}: InputType) => {

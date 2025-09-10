@@ -18,7 +18,7 @@ import { convertEpochToDays } from "../utils/EpochConverter";
 type ModalType = "withdraw" | "emergency" | "claim" | null;
 
 export default function Stake() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, status, chain, chainId} = useAccount();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [formData, setFormData] = useState({
     stakeAmount: "",
@@ -76,6 +76,7 @@ export default function Stake() {
     args: [address, GetTierNumber(rewardsTier)],
   });
 
+
   if (isStakeLoading && isRewardLoading) {
     return (
       <div className="grid justify-center">
@@ -84,37 +85,40 @@ export default function Stake() {
     );
   }
 
+  console.log('chain', chain);
+
   return (
-    <div className="md:px-12  md:py-6 bg-linear-to-br from-fuchsia-950 to-blue-950 brighteness-50 h-full min-h-screen">
+    <div className="md:px-12  md:py-6 h-full min-h-screen">
       <ConnectButton client={client} />
-      <div className="flex flex-wrap justify-around mt-10">
-        <div
-          className="bg-linear-to-b from-blue-700 to-fuchsia-950 md:border-t-1 rounded-3xl mx-2 md:p-6 p-3 brightness-110 hover:-translate-y-2 
-      transition-all duration-500"
-        >
-          <StakeForm
-            stakeAmount={formData.stakeAmount}
-            setStakeAmount={(p) => setFormData({ ...formData, stakeAmount: p })}
-          />
-          {isConnected ? (
-            <div className="bg-fuchsia-950 md:p-6 p-3 rounded-2xl mt-8 md:border-t-1">
+    
+      {isConnected && chainId === 11155111? (
+        <div className="flex flex-wrap justify-around mt-10">
+          <div className="rounded-3xl mx-2 md:p-6 p-3 shadow-lg">
+            <StakeForm
+              stakeAmount={formData.stakeAmount}
+              setStakeAmount={(p) =>
+                setFormData({ ...formData, stakeAmount: p })
+              }
+            />
+
+            <div className=" md:p-6 p-3 rounded-2xl mt-8">
               <p className="flex justify-end">
                 <Dropdown tier={rewardsTier} setTier={setRewardsTier} />
               </p>
               <div>
-                <div className="mt-4 bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl">
+                <div className="mt-4 bg-linear-to-r  text-gray-500 md:text-xl p-3 mb-2 rounded-xl">
                   My Stake:{" "}
                   <span className="text-black font-bold">
                     {formatEther(String(stakeData[0]))}
                   </span>
                 </div>
-                <p className="bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl">
+                <p className="bg-linear-to-r  text-gray-500 md:text-xl p-3 mb-2 rounded-xl">
                   Pending rewards:{" "}
                   <span className="text-black font-bold">
                     {formatEther(String(rewardData))}
                   </span>
                 </p>
-                <p className="bg-linear-to-r from-fuchsia-950 brightness-75 text-gray-500 md:text-xl p-3 mb-2 rounded-xl">
+                <p className="bg-linear-to-r  text-gray-500 md:text-xl p-3 mb-2 rounded-xl">
                   {" "}
                   <span className="text-black font-bold">
                     {convertEpochToDays(
@@ -181,15 +185,15 @@ export default function Stake() {
                 )}
               </div>
             </div>
-          ) : (
-            <div> Connect wallet</div>
-          )}
-        </div>
+          </div>
 
-        <div>
-          <Stats />
+          <div>
+            <Stats />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="text-2xl text-red-700"> connect to Ethereum Sepolia  </div>
+      )}
     </div>
   );
 }

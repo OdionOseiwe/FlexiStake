@@ -1,16 +1,15 @@
-import React from 'react'
 import Tether from '../images/tether.svg'
 
 export default function Stats() {
   return (
     <div>
       <div
-            className="bg-fuchsia-950 md:p-3 p-2 rounded-2xl mt-8 md:border-t-1 text-gray-500 w-60
+            className=" md:p-3 p-2 rounded-2xl mt-8  shadow-lg  w-60
         hover:-translate-y-2 
       transition-all duration-500"
           >
             <h1 className="mb-4">FlexiStake Stats</h1>
-            <div className="bg-linear-to-r from-fuchsia-950 brightness-75 rounded-2xl p-3 ">
+            <div className=" rounded-2xl p-3 ">
               <div className="flex items-center">
                 <div className="mr-4">
                   <img
@@ -30,12 +29,12 @@ export default function Stats() {
           </div>
 
           <div
-            className="bg-linear-to-b from-blue-700 to-fuchsia-950 md:p-3 p-2 rounded-2xl mt-8 md:border-t-1
+            className=" md:p-3 p-2 rounded-2xl mt-8 shadow-lg
         hover:-translate-y-2 
       transition-all duration-500"
           >
             <h1 className="mb-4">Assets Restaked</h1>
-            <div className="bg-linear-to-r from-fuchsia-950 brightness-75 rounded-2xl p-3 ">
+            <div className="rounded-2xl p-3 ">
               <div className="flex items-center">
                 <div className="mr-4">
                   <img

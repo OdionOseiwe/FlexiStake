@@ -19,9 +19,7 @@ const PopUpModal: React.FC<PopUpModalProps> = ({
   return (
     <div
       className="
-        p-4 absolute bottom-50 md:left-50 bg-linear-to-br
-        from-fuchsia-950 to-blue-950 brighteness-50
-        rounded-2xl
+        p-4 absolute bottom-50 md:left-50 bg-zinc-300 rounded-2xl
       "
     >
       <p className="flex justify-end cursor-pointer">
@@ -33,8 +31,8 @@ const PopUpModal: React.FC<PopUpModalProps> = ({
       <form>
         <label className="text-l">Enter amount</label>
         <input
-          className="flex justify-between items-center bg-fuchsia-950 p-4 w-full h-16 brightness-125 mb-6 
-            rounded-xl shadow-2xl shadow-blue-700 mt-1 text-gray-500 focus:border-none focus:outline-0 text-2xl"
+          className="flex justify-between items-center p-4 w-full h-16 brightness-125 mb-6 
+            rounded-xl bg-white mt-1 text-black focus:border-none focus:outline-0 text-2xl"
           type="text"
           placeholder="0.0"
           onChange={(e) => setAmount(e.target.value)}

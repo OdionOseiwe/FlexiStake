@@ -31,7 +31,7 @@ export const useStakeFlow = () => {
       isApproving(false);
       setLoading(false);
       return true;
-    } catch (err) {
+    } catch (err:any) {
       setError(err.message);
       return false;
     } finally {
@@ -66,8 +66,8 @@ export const useStakeFlow = () => {
       setLoading(false);
       isStaking(false);
       return true;
-    } catch (err) {
-      setError(err.message);
+    } catch (error:any) {
+      setError(error.message);
       return false;
     } finally {
       setLoading(false);
