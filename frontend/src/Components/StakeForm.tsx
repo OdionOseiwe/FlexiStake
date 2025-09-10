@@ -1,33 +1,32 @@
-import { ArrowDown } from 'lucide-react';
-import Button from '../Components/Button';
-import Tether from '../images/tether.svg'
-import Dropdown from '../Components/Dropdown';
-import {useContractRead} from '../hooks/useContractRead';
-import StakeAbi from '../ABI/StakeAbi.json'
-import { StakeAddress } from '../utils/address';
-import { useState } from 'react';
-import { useStakeFlow } from '../hooks/useStakeflow';
-import { parseUnits } from 'ethers';
-import { GetTierNumber } from '../utils/tier';
-import { useAccount } from 'wagmi'
+import { ArrowDown } from "lucide-react";
+import Button from "../Components/Button";
+import Tether from "../images/tether.svg";
+import Dropdown from "../Components/Dropdown";
+import { useContractRead } from "../hooks/useContractRead";
+import StakeAbi from "../ABI/StakeAbi.json";
+import { StakeAddress } from "../utils/Address";
+import { useState } from "react";
+import { useStakeFlow } from "../hooks/useStakeflow";
+import { parseUnits } from "ethers";
+import { GetTierNumber } from "../utils/Tier";
+import { useAccount } from "wagmi";
 import { formatEther } from "ethers";
 
 type StakeFormProps = {
-    stakeAmount: string;
-    setStakeAmount: (amount: string) => void;
-}
+  stakeAmount: string;
+  setStakeAmount: (amount: string) => void;
+};
 
 function StakeForm({ stakeAmount, setStakeAmount }: StakeFormProps) {
   const [stakeTier, setStakeTier] = useState("Tier1");
   const { isConnected } = useAccount();
   const { stakeTokens, loading, error, approve, stake } = useStakeFlow();
-  
 
-    const { data:basicAPR, isLoading:loadingBasicAPR } = useContractRead({
-      abi: StakeAbi,
-      address: StakeAddress,
-      functionName: "basicAPR"
-    });  
+  const { data: basicAPR, isLoading: loadingBasicAPR } = useContractRead({
+    abi: StakeAbi,
+    address: StakeAddress,
+    functionName: "basicAPR",
+  });
 
   const handleStake = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,17 +39,21 @@ function StakeForm({ stakeAmount, setStakeAmount }: StakeFormProps) {
       setStakeAmount("");
     }
   };
-  
+
   return (
     <>
-    
       <div>
         <h1 className="md:text-2xl text-xl"> Stake Tokens</h1>
-        
+
         <p className="mt-4 text-fuchsia-950 font-extralight">
-          APR value: { isConnected && !loadingBasicAPR &&<span className="ml-2 font-bold">{Math.round(Number(formatEther(String(basicAPR))))}%</span> }
+          APR value:{" "}
+          {isConnected && !loadingBasicAPR && (
+            <span className="ml-2 font-bold">
+              {Math.round(Number(formatEther(String(basicAPR))))}%
+            </span>
+          )}
         </p>
-       
+
         <p className="mt-4 text-gray-500 text-l font-bold">
           Stake your tokens in Tier 1, 2, or 3. Earn interest as you stake,{" "}
           <br />
@@ -100,12 +103,13 @@ function StakeForm({ stakeAmount, setStakeAmount }: StakeFormProps) {
           </div>
           {approve && <p className="text-green-500 mt-2">Approving...</p>}
           {stake && !error && <p className="text-green-500 mt-2">Staking...</p>}
-          {error && <p className="text-red-500 mt-2">error occured while staking</p>}
+          {error && (
+            <p className="text-red-500 mt-2">error occured while staking</p>
+          )}
         </form>
       </div>
-      
     </>
   );
 }
 
-export default StakeForm
+export default StakeForm;

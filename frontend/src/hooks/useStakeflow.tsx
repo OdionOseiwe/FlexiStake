@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ethers } from "ethers";
 import TokenAbi from "../ABI/TokenAbi.json";
 import StakeAbi from "../ABI/StakeAbi.json";
-import { TokenAddress, StakeAddress } from "../utils/address";
+import { TokenAddress, StakeAddress } from "../utils/Address";
 import { useWalletClient } from "wagmi";
 
 export const useStakeFlow = () => {

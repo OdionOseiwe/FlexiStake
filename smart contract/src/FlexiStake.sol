@@ -10,9 +10,9 @@ contract Staking is Ownable, ReentrancyGuardTransient{
     using SafeERC20 for IERC20;
     IERC20 rewardToken;
 
-    uint256 public basicAPR = 10e18; // 10%
+    uint256 public basicAPR = 1000; // 10.00% (10000 = 100%)
+    uint256 private SCALING_FACTOR = 10000; // used to reduce APR when total staked grows
     uint256 public totalStaked;
-    uint256 private SCALING_FACTOR = 10000; // 100%
     uint256 private totalRewardsPaid;
     uint256 private penaltyPercentage = 500;  // 5%
 
@@ -38,6 +38,13 @@ contract Staking is Ownable, ReentrancyGuardTransient{
 
     constructor(address _owner, address _rewardToken) Ownable(_owner){
         rewardToken = IERC20(_rewardToken);
+    }
+
+
+    // --- set APR in BPS (e.g., pass 1000 for 10.00%) ---
+    function setAPR(uint256 _aprBps) external onlyOwner {
+        require(_aprBps <= 10000, "APR can't exceed 100%");
+        basicAPR = _aprBps;
     }
 
     function stakeToken(uint256 _amount, LockupTier _lockupTier) public nonReentrant{
@@ -85,23 +92,22 @@ contract Staking is Ownable, ReentrancyGuardTransient{
 
 
     // automatically stake rewards again
-    function claimRewards(LockupTier _lockupTier) public nonReentrant{
-        uint256 pendingRewards = calculateRewards(msg.sender,_lockupTier);
-        require(Rewards[msg.sender][_lockupTier] > 0, "No rewards");
-        require(rewardToken.balanceOf(address(this)) >= pendingRewards, "Insufficient reward tokens");
+    function claimRewards(LockupTier _lockupTier) public nonReentrant {
+        // collect freshly-calculated pending + stored Rewards
+        uint256 pending = calculateRewards(msg.sender, _lockupTier);
+        uint256 stored = Rewards[msg.sender][_lockupTier];
+        uint256 totalPending = pending + stored;
+        require(totalPending > 0, "No rewards");
+        require(rewardToken.balanceOf(address(this)) >= totalPending, "Insufficient reward tokens");
 
-        totalRewardsPaid += pendingRewards;
         Rewards[msg.sender][_lockupTier] = 0;
         stakes[msg.sender][_lockupTier].lastUpdateTime = block.timestamp;
 
-        rewardToken.safeTransfer(msg.sender, pendingRewards);
-        emit ClaimedReward(msg.sender, pendingRewards);
+        totalRewardsPaid += totalPending;
+        rewardToken.safeTransfer(msg.sender, totalPending);
+        emit ClaimedReward(msg.sender, totalPending);
     }
-
-    function setAPR(uint256 _apr) external onlyOwner {
-        require(_apr > 0, "APR must be > 0");
-        basicAPR = _apr * 100; // basic points
-    }
+    
 
     function _getLockupDuration(LockupTier _tier) internal pure returns (uint256) {
         if (_tier == LockupTier.TIER_30_DAYS) return 30 days;
@@ -109,9 +115,13 @@ contract Staking is Ownable, ReentrancyGuardTransient{
         return 365 days;
     }
 
-    function updateRewards(address _owner, LockupTier _lockupTier) internal  {
+    function updateRewards(address _owner, LockupTier _lockupTier) internal {
         uint256 pending = calculateRewards(_owner, _lockupTier);
-        Rewards[_owner][_lockupTier]+= pending;  
+        if (pending > 0) {
+            Rewards[_owner][_lockupTier] += pending;
+        }
+        // reset lastUpdateTime so we don't double count next time
+        stakes[_owner][_lockupTier].lastUpdateTime = block.timestamp;
     }
 
     function calculateRewards(address _owner, LockupTier _lockupTier) internal view returns (uint256) {
@@ -121,34 +131,35 @@ contract Staking is Ownable, ReentrancyGuardTransient{
 
         uint256 stakingDuration = block.timestamp - userStake.lastUpdateTime;
         uint256 lockUp = _getLockupDuration(_lockupTier);
+        if (stakingDuration > lockUp) stakingDuration = lockUp;
 
-        if (stakingDuration > lockUp) {
-            stakingDuration = lockUp;
-        }
+        // tier multiplier in integer percent * 100 (100 => 1.0x)
+        uint256 tierMultiplierPercent;
+        if (_lockupTier == LockupTier.TIER_30_DAYS) tierMultiplierPercent = 100;      // 1.0x
+        else if (_lockupTier == LockupTier.TIER_90_DAYS) tierMultiplierPercent = 120; // 1.2x
+        else tierMultiplierPercent = 150; // 1.5x
 
-        uint256 tierMultiplier;
-        if (_lockupTier == LockupTier.TIER_30_DAYS) tierMultiplier = 1e18;      // 1.0
-        else if (_lockupTier == LockupTier.TIER_90_DAYS) tierMultiplier = 15e17; // 1.5
-        else tierMultiplier = 3e18; // 3.0
+        uint256 aprBps = currentAPR(totalStaked); // in BPS, e.g., 1000 = 10.00%
+        // rewardPerYear in token units
+        uint256 rewardPerYear = (stakedAmount * aprBps) / 10000;
+        uint256 rewardForDuration = (rewardPerYear * stakingDuration) / 365 days;
 
-        uint256 apr = currentAPR(totalStaked); // apr = 5e16 
-        uint256 rewardPerYear = (stakedAmount * apr) / 1e18;//(100e18 * 5e16) / 1e18
-        uint256 rewardForDuration = (rewardPerYear * stakingDuration) / 365 days;//(5e18 * 30) /365
-
-        return (rewardForDuration * tierMultiplier) / 1e18; //(4.1e17 * 1e18)/ 1e18 = 4.1e17
+        // apply tier multiplier
+        return (rewardForDuration * tierMultiplierPercent) / 100;
     }
 
+      
+
     // this is where the dynamic apr is calculated base on the totalStaked
-    function currentAPR(uint256 _totalStaked) public view returns (uint256) {
-        // if basicAPR = 10e18 => 10%
-        // totalStaked = 10e18
-        // then numerator = 10e18 * 10000 = 1e21.
-        // then denominator = 10010
-        // 1e21 / 10010 = 9.999e16
-        uint256 numerator = basicAPR * SCALING_FACTOR; 
-        uint256 denominator = SCALING_FACTOR + (_totalStaked / 1e18);
-        require(denominator != 0, "Math error");
-        return numerator / denominator;
+    // what determines the APR is totalStaked
+    // the more staked, the lower the APR
+    function currentAPR(uint256 _totalStaked) internal view returns (uint256) {
+        // Reduce APR as total staked increases:
+        // apr = basicAPR * SCALING_FACTOR / (SCALING_FACTOR + totalStakedInTokens)
+        // where totalStakedInTokens = totalStaked / 1e18 (so it's plain token units)
+        uint256 totalInTokens = _totalStaked / 1e18;
+        uint256 denom = SCALING_FACTOR + totalInTokens; 
+        return (basicAPR * SCALING_FACTOR) / denom; // result in BPS
     }
 
     function getUserStake(address user, LockupTier tier) public view returns (uint256 amount, uint256 lastUpdate) {
